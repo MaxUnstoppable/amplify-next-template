@@ -5,7 +5,11 @@ export const storage = defineStorage({
     access: (allow) => ({
         'public/*': [
             allow.guest.to(['read']),
-            allow.authenticated.to(['read']),
+            allow.authenticated.to(['read',]),
+        ],
+        's3-browser/*': [
+            allow.guest.to(['read']),
+            allow.authenticated.to(['read',]),
         ],
         'protected/{entity_id}/*': [
             allow.authenticated.to(['read']),
