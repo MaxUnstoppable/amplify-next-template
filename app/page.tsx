@@ -1,52 +1,51 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "@/amplify/data/resource";
-import "./../app/app.css";
+'use client';
+import React from "react";
 import { Amplify } from "aws-amplify";
-import outputs from "@/amplify_outputs.json";
-import "@aws-amplify/ui-react/styles.css";
-import { Authenticator } from '@aws-amplify/ui-react';
-import { StorageBrowser } from '../components/StorageBrowser';
+import { signOut } from "aws-amplify/auth";
 
+import { Button, withAuthenticator } from "@aws-amplify/ui-react";
+import {
+  createStorageBrowser,
+  createAmplifyAuthAdapter,
+  elementsDefault,
+} from "@aws-amplify/ui-react-storage/browser";
+import "@aws-amplify/ui-react-storage/styles.css";
+import "@aws-amplify/ui-react-storage/storage-browser-styles.css";
 
-Amplify.configure(outputs);
+import config from "../amplify_outputs.json";
 
-const client = generateClient<Schema>();
+Amplify.configure(config);
 
-export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }
-
-  useEffect(() => {
-    listTodos();
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
-  }
+function Example() {
+  const { StorageBrowser } = createStorageBrowser({
+    elements: elementsDefault,
+    config: createAmplifyAuthAdapter({
+      options: {
+        defaultPrefixes: [
+          "media-readwritedelete/",
+          "media-readonly/",
+          "shared-folder-readwrite/",
+          (identityId: string) => `protected-useronlyreadwritedelete/${identityId}/`,
+          (identityId: string) => `private-useronlyreadwritedelete/${identityId}/`,
+        ],
+      },
+    }),
+  });
 
   return (
-    <Authenticator>
-      {({ signOut, user }) => (
-        <main>
-          <h1>Hello {user?.username}</h1>
-          <button onClick={signOut}>Sign out</button>
-
-          {/* StorageBrowser Component */}
-          <h2>Your Files</h2>
-          <StorageBrowser />
-
-        </main>
-      )}
-    </Authenticator>
+    <>
+      <Button
+        marginBlockEnd="xl"
+        size="small"
+        onClick={() => {
+          signOut();
+        }}
+      >
+        Sign Out
+      </Button>
+      <StorageBrowser />
+    </>
   );
 }
+
+export default withAuthenticator(Example);
