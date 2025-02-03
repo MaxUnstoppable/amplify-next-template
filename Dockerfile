@@ -4,7 +4,7 @@ FROM node:20-alpine As development
 WORKDIR /usr/src/app
 COPY . ./
 RUN npm install
-RUN npm i @aws-amplify/ui-react-storage aws-amplify
+RUN npm i @aws-amplify/ui-react aws-amplify
 
 EXPOSE 3000
 CMD ["npm", "run", "dev"] 
